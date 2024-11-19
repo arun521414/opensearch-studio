@@ -3,6 +3,9 @@ export default {
   path : 'model-groups',
   name : 'ModelGroups',
   component : ()=>import('./pages/ModelGroups.vue'),
+  redirect : ()=>{
+    return {name:'ModelGroupList'}
+  },
   children : [
     {
       path : '',

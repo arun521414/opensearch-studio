@@ -1,3 +1,4 @@
+
 class Gates {
 
   static #permissions = []

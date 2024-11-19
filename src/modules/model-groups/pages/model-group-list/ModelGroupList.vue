@@ -11,7 +11,8 @@
     </div>
 
     <div class="row justify-center items-center">
-      <q-input label="Search model group" outlined rounded dense style="width: 320px;">
+      <q-input v-model="searchInput" @update:model-value="searchInputUpdateHandler" label="Search model group" outlined
+        rounded dense style="width: 320px;" debounce="500" clearable>
         <template #prepend>
           <q-icon name="search" color="primary" />
         </template>
@@ -19,13 +20,21 @@
     </div>
 
     <div class="q-py-md">
-      <model-groups-table :loading="false" :model-group-list="[]" />
+      <model-groups-table :loading="isModelGroupListFetching" :model-group-list="modelGroupList" />
     </div>
 
   </q-page>
 </template>
 <script setup>
 import ModelGroupsTable from '../../components/ModelGroupsTable.vue';
+import { useModelGroupList } from '../../composables';
 
+
+const {
+  searchInput,
+  modelGroupList,
+  isModelGroupListFetching,
+  searchInputUpdateHandler
+} = useModelGroupList()
 
 </script>
