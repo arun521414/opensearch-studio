@@ -1,0 +1,52 @@
+@font-face {
+  font-family: "light";
+  src: url(./fonts/OpenSans-Light.woff);
+}
+
+@font-face {
+  font-family: "regular";
+  src: url(./fonts/OpenSans-Regular.woff);
+}
+
+@font-face {
+  font-family: "semi-bold";
+  src: url(./fonts/OpenSans-SemiBold.woff);
+}
+
+@font-face {
+  font-family: "bold";
+  src: url(./fonts/OpenSans-Bold.woff);
+}
+
+@font-face {
+  font-family: "extra-bold";
+  src: url(./fonts/OpenSans-ExtraBold.woff);
+}
+
+.text-light {
+  font-family: "light";
+}
+
+.text-regular {
+  font-family: "regular";
+}
+
+.text-semi-bold {
+  font-family: "semi-bold";
+}
+
+.text-bold {
+  font-family: "bold";
+}
+
+.text-extra-bold {
+  font-family: "extra-bold";
+}
+
+body {
+  font-family: "regular";
+  font-style: normal;
+  font-weight: normal;
+  letter-spacing: 0;
+  line-height: 24px;
+}
