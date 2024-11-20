@@ -12,3 +12,10 @@ export function fetchModelGroups({index,size,query}){
     }
   })
 }
+
+export function fetchModelGroupInfo({groupId}){
+  return api({
+    url : `/_plugins/_ml/model_groups/${groupId}`,
+    method : 'GET'
+  })
+}

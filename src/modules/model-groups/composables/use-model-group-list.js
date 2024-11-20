@@ -1,6 +1,7 @@
 import { storeToRefs } from "pinia"
 import { useModelGroupListStore } from "../stores"
-import { onMounted, onUnmounted, ref } from "vue"
+import { computed, onMounted, onUnmounted, ref } from "vue"
+import { delay_seconds, table_size_options } from "src/helpers/constants"
 
 export function useModelGroupList(){
 
@@ -9,6 +10,8 @@ export function useModelGroupList(){
     modelGroupList,
     modelGroupListMaster,
     isModelGroupListFetching,
+    totalModelGroupListCount,
+    currentModelGroupListCount,
     fetchStatus
   } = storeToRefs(modelGroupListStore)
 
@@ -16,10 +19,26 @@ export function useModelGroupList(){
 
   const pagination = ref({
     page : 1,
-    size : 10
+    size : table_size_options[0]
   })
 
   const isFetchError = ref(false)
+  const isFirstTimeFetched = ref(false)
+
+  const index = computed(()=>{
+    return pagination.value.size * ( pagination.value.page - 1)
+  })
+
+  const totalPages = computed(()=>{
+    return Math.ceil(totalModelGroupListCount.value/pagination.value.size) || 1;
+  })
+
+  const rangeOfRecords = computed(()=>{
+    return {
+      start : (pagination.value.page - 1 ) * pagination.value.size + 1,
+      end   : Math.min(pagination.value.page * pagination.value.size,totalModelGroupListCount.value)
+    }
+  })
 
   async function getModelGroupListHandler(){
 
@@ -34,11 +53,13 @@ export function useModelGroupList(){
     }
 
     await modelGroupListStore.getModelGroupList({
-      index : pagination.value.page - 1,
+      index : index.value,
       size : pagination.value.size,
       query : query
     })
+
     fetchStatus.value ? modelGroupListStore.load() : isFetchError.value = true
+
   }
 
 
@@ -48,11 +69,33 @@ export function useModelGroupList(){
   }
 
   function searchInputUpdateHandler(){
+    pagination.value.page = 1
     refreshHandler()
   }
 
-  onMounted(()=>{
-    getModelGroupListHandler()
+  function pageSizeUpdateHandler(){
+    localStorage.setItem('model_group_table_size',pagination.value.size)
+    pagination.value.page = 1
+    refreshHandler()
+  }
+
+  function paginationUpdateHandler(){
+    refreshHandler()
+  }
+
+  onMounted(async ()=>{
+
+    const delay = setTimeout(()=>{
+      isFirstTimeFetched.value = false
+    },delay_seconds)
+
+    pagination.value.size = Number(localStorage.getItem('model_group_table_size')) || table_size_options[0]
+
+    await getModelGroupListHandler()
+
+    clearTimeout(delay)
+    isFirstTimeFetched.value = true
+
   })
 
   onUnmounted(()=>{
@@ -61,8 +104,17 @@ export function useModelGroupList(){
 
   return {
     searchInput,
+    pagination,
     modelGroupList,
+    currentModelGroupListCount,
+    totalModelGroupListCount,
+    rangeOfRecords,
+    totalPages,
     isModelGroupListFetching,
-    searchInputUpdateHandler
+    isFetchError,
+    isFirstTimeFetched,
+    searchInputUpdateHandler,
+    pageSizeUpdateHandler,
+    paginationUpdateHandler
   }
 }

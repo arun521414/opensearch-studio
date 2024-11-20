@@ -50,3 +50,23 @@ body {
   letter-spacing: 0;
   line-height: 24px;
 }
+
+.no-bg {
+  background: none;
+}
+
+body.body--light {
+
+  .table-header-bg {
+    background-color: white;
+  }
+
+}
+
+body.body--dark {
+
+  .table-header-bg {
+    background-color: white ;
+  }
+
+}

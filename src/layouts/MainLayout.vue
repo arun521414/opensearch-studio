@@ -12,7 +12,7 @@
         <div class="q-gutter-x-sm on-left">
           <q-badge color="red-8" label="Offline" rounded class="q-px-lg text-semi-bold"
             style="font-size: 14px;padding-block:4px;" />
-          <q-btn icon="settings" flat round @click="toggleClusterSettingDialog" />
+          <q-btn icon="refresh" flat round @click="$q.dark.toggle" />
           <q-btn icon="notifications" flat round />
           <q-btn icon="person" flat round />
         </div>
@@ -55,10 +55,5 @@ import { moduleList } from 'src/boot/modules';
 const isleftDrawerShow = ref(true)
 const miniDrawer = ref(true)
 
-const isClusterSettingDialogShowing = ref(false)
-
-function toggleClusterSettingDialog() {
-  isClusterSettingDialogShowing.value = !isClusterSettingDialogShowing.value
-}
 
 </script>
