@@ -55,6 +55,14 @@ body {
   background: none;
 }
 
+.scroll-card {
+  width: 480px;
+  height: 650px;
+  max-height: 680px;
+  min-height: 300px;
+  overflow: hidden;
+}
+
 body.body--light {
 
   .table-header-bg {

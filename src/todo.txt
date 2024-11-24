@@ -1,0 +1,2 @@
+model-groups
+  support restricted access mode

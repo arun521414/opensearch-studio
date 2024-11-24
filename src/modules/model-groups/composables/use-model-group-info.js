@@ -1,7 +1,7 @@
 import { storeToRefs } from "pinia"
 import { useModelGroupInfoStore } from "../stores"
 import { useRoute } from "vue-router"
-import { onMounted, onUnmounted, ref } from "vue"
+import { onMounted, onUnmounted, ref,computed } from "vue"
 import { delay_seconds } from "src/helpers/constants"
 
 export function useModelGroupInfo(){
@@ -12,14 +12,34 @@ export function useModelGroupInfo(){
   const route = useRoute()
 
   const isFirstTimeFetched = ref(false)
+  const isFetchSuccess = ref(false)
+
+  const isPageReady = computed(()=>{
+    return isFirstTimeFetched.value && isFetchSuccess.value
+  })
+
+  const isPageLoading = computed(()=>{
+    return !isFirstTimeFetched.value && !isFetchSuccess.value && isModelGroupInfoFetching.value
+  })
+
+  const isPageError = computed(()=>{
+    return isFirstTimeFetched.value && !isFetchSuccess.value && !isModelGroupInfoFetching.value
+  })
 
   async function getModelGroupInfoHandler(){
     await modelGroupInfoStore.getModelGroupInfo({
       groupId : route.params.modelGroupId
     })
+    if(fetchStatus.value){
+      isFetchSuccess.value = true
+    }
+    else{
+      isFetchSuccess.value = false
+    }
   }
 
-  onMounted(async ()=>{
+
+  async function initialFetchHandler(){
 
     const delay = setTimeout(()=>{
       isFirstTimeFetched.value = false
@@ -30,6 +50,14 @@ export function useModelGroupInfo(){
     clearTimeout(delay)
     isFirstTimeFetched.value = true
 
+  }
+
+  function retryHandler(){
+    initialFetchHandler()
+  }
+
+  onMounted(()=>{
+    initialFetchHandler()
   })
 
 
@@ -41,6 +69,10 @@ export function useModelGroupInfo(){
     modelGroupInfo,
     isModelGroupInfoFetching,
     fetchStatus,
-    isFirstTimeFetched
+    isFirstTimeFetched,
+    isPageReady,
+    isPageLoading,
+    isPageError,
+    retryHandler
   }
 }

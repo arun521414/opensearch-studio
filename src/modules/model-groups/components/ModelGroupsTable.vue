@@ -1,6 +1,6 @@
 <template>
   <q-table row-key="name" :columns="columns" :rows="props?.modelGroupList" :loading="props?.loading" flat
-    hide-pagination bordered class="sticky-header-table">
+    hide-pagination bordered class="sticky-header-table" :rows-per-page-options="[0]">
 
     <template #body="props">
 
@@ -64,11 +64,13 @@
     </template>
 
   </q-table>
+
 </template>
 <script setup>
 import { successNotify } from 'src/helpers/notify';
 import { copyToClipboard } from 'quasar';
 import { useRouter } from 'vue-router';
+import { ref } from 'vue';
 
 const router = useRouter()
 
@@ -83,6 +85,8 @@ const props = defineProps({
   }
 })
 
+const emits = defineEmits(['deleteGroup'])
+
 async function actionsClickHandler(actionName, row) {
 
   if (actionName == 'moreInfo') {
@@ -93,10 +97,10 @@ async function actionsClickHandler(actionName, row) {
     successNotify('group ID copied')
   }
   else if (actionName == 'editGroup') {
-
+    router.push({ name: 'ModelGroupEdit', params: { modelGroupId: row.groupId } })
   }
   else if (actionName == 'deleteGroup') {
-
+    emits('deleteGroup', row.groupId, row.groupName)
   }
 
 }
@@ -117,7 +121,8 @@ const columns = [
     label: 'Group Name',
     field: 'groupName',
     align: 'center',
-    headerClasses: 'text-semi-bold text-primary table-header-bg'
+    headerClasses: 'text-semi-bold text-primary table-header-bg',
+    classes: 'text-semi-bold'
   },
   {
     name: 'groupDescription',

@@ -2,6 +2,7 @@ import { storeToRefs } from "pinia"
 import { useModelGroupListStore } from "../stores"
 import { computed, onMounted, onUnmounted, ref } from "vue"
 import { delay_seconds, table_size_options } from "src/helpers/constants"
+import { bus } from "src/helpers/bus"
 
 export function useModelGroupList(){
 
@@ -22,7 +23,7 @@ export function useModelGroupList(){
     size : table_size_options[0]
   })
 
-  const isFetchError = ref(false)
+  const isFetchSuccess = ref(false)
   const isFirstTimeFetched = ref(false)
 
   const index = computed(()=>{
@@ -40,13 +41,38 @@ export function useModelGroupList(){
     }
   })
 
+  const isPageReady = computed(()=>{
+    return isFirstTimeFetched.value && isFetchSuccess.value
+  })
+
+  const isPageLoading = computed(()=>{
+    return !isFirstTimeFetched.value && !isFetchSuccess.value && isModelGroupListFetching.value
+  })
+
+  const isPageError = computed(()=>{
+    return isFirstTimeFetched.value && !isFetchSuccess.value && !isModelGroupListFetching.value
+  })
+
   async function getModelGroupListHandler(){
 
     let query = searchInput.value ? {
-      multi_match : {
-        query  : searchInput.value,
-        type   : "best_fields",
-        fields : ['_id','name','description']
+      bool : {
+        should: [
+          {
+            multi_match: {
+              query: searchInput.value,
+              type: "phrase_prefix",
+              fields: ["name^4", "description"]
+            }
+          },
+          {
+            term: {
+              _id: {
+                value: searchInput.value
+              }
+            }
+          }
+        ]
       }
     } : {
       match_all : {}
@@ -58,10 +84,15 @@ export function useModelGroupList(){
       query : query
     })
 
-    fetchStatus.value ? modelGroupListStore.load() : isFetchError.value = true
+    if(fetchStatus.value){
+      isFetchSuccess.value = true
+      modelGroupListStore.load()
+    }
+    else{
+      isFetchSuccess.value = false
+    }
 
   }
-
 
   function refreshHandler(){
     modelGroupListMaster.value = []
@@ -83,7 +114,7 @@ export function useModelGroupList(){
     refreshHandler()
   }
 
-  onMounted(async ()=>{
+  async function initialFetchHandler(){
 
     const delay = setTimeout(()=>{
       isFirstTimeFetched.value = false
@@ -96,10 +127,25 @@ export function useModelGroupList(){
     clearTimeout(delay)
     isFirstTimeFetched.value = true
 
+  }
+
+  function retryHandler(){
+    initialFetchHandler()
+  }
+
+  onMounted(()=>{
+
+    initialFetchHandler()
+
+    bus.on('refresh-model-group-list',()=>{
+      refreshHandler()
+    })
+
   })
 
   onUnmounted(()=>{
     modelGroupListStore.$reset()
+    bus.off('refresh-model-group-list')
   })
 
   return {
@@ -109,12 +155,14 @@ export function useModelGroupList(){
     currentModelGroupListCount,
     totalModelGroupListCount,
     rangeOfRecords,
-    totalPages,
     isModelGroupListFetching,
-    isFetchError,
-    isFirstTimeFetched,
+    totalPages,
+    isPageReady,
+    isPageLoading,
+    isPageError,
     searchInputUpdateHandler,
     pageSizeUpdateHandler,
-    paginationUpdateHandler
+    paginationUpdateHandler,
+    retryHandler
   }
 }

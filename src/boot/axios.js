@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'https://localhost:9200',
+  baseURL: 'http://localhost:9200',
   withCredentials : true,
   auth : {
     username : 'admin',
